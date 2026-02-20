@@ -1,0 +1,95 @@
+# WORKSPACE RULES — Java Engineering (Secure + Maintainable + Compliant)
+
+## Activation
+Always apply these rules for this workspace.
+(If using glob-based activation, apply to: **/*.java, **/*.kt, pom.xml, build.gradle, build.gradle.kts, settings.gradle, *.properties, *.yml, Dockerfile, k8s/*.yaml)
+
+## 0) Prime Directive
+Deliver correct, secure, maintainable Java changes with minimal risk:
+- Prefer small, reviewable diffs over large refactors.
+- Preserve existing behavior unless explicitly asked to change it.
+- Default to secure-by-design patterns and safe configuration.
+
+## 1) Security & Compliance (Non-Negotiables)
+- Never output, log, or commit secrets (tokens, passwords, API keys, private keys). If found: redact, recommend rotation, and move to secret manager/env injection.
+- Treat all inbound data as untrusted: request bodies, headers, files, DB records, and external service responses.
+- Do not recommend disabling security controls in production (TLS verification, CSRF, authz checks, input validation).
+- Assume regulated data may exist (PII/PHI/PCI). Apply data minimization and redaction-first logging.
+
+## 2) OWASP / Common Vulnerabilities Checklist (Always Consider)
+When working on APIs, controllers, DB, file handling, or auth flows, explicitly check for:
+- Broken or missing authorization (object-level checks, role checks)
+- Injection (SQL/JPQL/LDAP/OS command), unsafe deserialization
+- XSS/HTML injection (when rendering)
+- SSRF (URL fetchers, webhooks)
+- Path traversal & insecure file upload
+- Sensitive data exposure through logs/errors
+- Rate limiting / resource exhaustion
+
+## 3) Java Secure Coding Rules (Oracle-aligned)
+- Input validation is mandatory at trust boundaries (controllers, message consumers).
+- Avoid risky reflection/deserialization patterns; whitelist types if unavoidable.
+- Avoid executing OS commands with untrusted input; prefer safe libraries.
+- Access control must be centralized and consistently enforced.
+- Fail safely: predictable error handling, no stack traces to clients.
+
+## 4) Spring Boot / Web API Practices (if applicable)
+- Use Spring Security for authentication + authorization; enforce method or endpoint security consistently.
+- Validate DTOs using Bean Validation (@Valid, @NotNull, @Size, etc.) at controller boundaries.
+- Do not disable CSRF for browser-based flows; if API-only, use stateless auth patterns explicitly.
+- Use secure defaults for cookies (HttpOnly, Secure, SameSite) when cookies are used.
+- Prefer structured error responses without leaking internals (no stack traces, no sensitive details).
+
+## 5) Data Access (JPA/JDBC) Rules
+- Never build queries via string concatenation. Use parameterized queries / prepared statements.
+- Prevent IDOR: enforce record ownership/tenant constraints in the service layer.
+- Transactions: keep them tight; avoid long-running transactions and N+1 query pitfalls.
+- Validate pagination/filters/sort to avoid expensive queries and DoS risk.
+
+## 6) Cryptography & Password Handling
+- Never implement custom cryptography.
+- Passwords must be hashed (not encrypted) using a modern password hashing scheme.
+- Keys must be managed via KMS/secret manager; no hard-coded keys.
+
+## 7) Logging, Observability, and Error Handling
+- Logs must never contain secrets or sensitive payloads.
+- Use structured logging with correlation IDs / request IDs where possible.
+- Log security events: auth failures, access denials, suspicious activity (sanitized).
+- Exceptions:
+  - Handle expected exceptions explicitly.
+  - Convert internal exceptions into safe, stable API errors.
+  - Do not return stack traces to clients.
+
+## 8) Code Style & Formatting (Google Java Style)
+- Follow a consistent Java style guide and keep formatting automated.
+- Prefer a standard formatter (e.g., google-java-format) or the repo’s existing formatter.
+- Avoid wildcard imports; keep imports organized.
+- Keep methods small; single responsibility; descriptive naming.
+
+## 9) Testing Requirements
+For any functional change, add/adjust tests:
+- Unit tests for business logic (JUnit 5).
+- Integration tests for controllers/services where risk is medium/high.
+- Security tests for authz boundaries and negative cases (for sensitive endpoints).
+- Include edge cases (null/empty/large input, invalid states, unauthorized access).
+
+## 10) Build & Dependency Hygiene (Maven/Gradle)
+- Prefer minimal dependency additions; justify new dependencies.
+- Keep dependency versions pinned (use lock mechanisms where available).
+- Avoid outdated/vulnerable components; flag risky dependencies for review.
+- Ensure reproducible builds and CI-friendly commands.
+
+## 11) Change Delivery Format (How you should respond)
+When proposing changes, provide:
+1) Summary (what/why)
+2) Patch-style output (only changed files/sections)
+3) Security implications + mitigations
+4) Test plan (commands + test cases to add)
+5) Rollback plan (how to revert safely)
+
+## 12) Clarifications Policy (Token-efficient)
+Ask at most two clarifying questions. If ambiguity remains:
+- state assumptions
+- proceed with a safe default approach
+- highlight what to change if assumptions are wrong
+ 

@@ -1,0 +1,5 @@
+.env
+*.json
+.adk/
+__pycache__/
+.DS_Store
