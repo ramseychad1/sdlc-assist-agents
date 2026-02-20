@@ -44,7 +44,7 @@ Using the PRD and template as your foundation:
    - Input fields (text, textarea, select, checkbox, radio)
    - Cards (content container with header/body/footer)
    - Data tables (for list views mentioned in PRD)
-   - Navigation (sidebar, breadcrumbs, tabs)
+   - Collapsible Sidebar (left navigation that expands to show icon + label and collapses to icon-only rail)
    - Typography samples (headings, body text, labels)
 
 3. **Provide HTML/CSS examples** for each component that:
@@ -167,6 +167,12 @@ Respond with a JSON object in this EXACT structure (no markdown fences, no pream
       "htmlExample": "<table class='table'><thead><tr><th>Name</th><th>Status</th><th>Date</th></tr></thead><tbody><tr><td>Item 1</td><td><span class='badge badge-success'>Active</span></td><td>2024-02-19</td></tr></tbody></table>",
       "cssExample": ".table { width: 100%; border-collapse: collapse; font-size: var(--font-size-sm); } .table th { text-align: left; padding: var(--spacing-sm) var(--spacing-md); background: var(--muted); font-weight: var(--font-weight-semibold); border-bottom: 1px solid var(--border); } .table td { padding: var(--spacing-sm) var(--spacing-md); border-bottom: 1px solid var(--border); }"
     },
+    "sidebar": {
+      "description": "Collapsible left navigation sidebar. Expands to show icon + label (240px wide); collapses to icon-only rail (56px wide). Toggle controlled by a collapse button at the bottom of the sidebar. Uses CSS transition for smooth animation.",
+      "variants": ["expanded", "collapsed"],
+      "htmlExample": "<nav class='sidebar' id='sidebar'><div class='sidebar-header'><span class='sidebar-logo'>⚡</span><span class='sidebar-app-name'>App Name</span></div><div class='sidebar-section'><p class='sidebar-section-label'>MAIN</p><a class='sidebar-item active' href='#'><span class='sidebar-icon'>⊞</span><span class='sidebar-label'>Dashboard</span></a><a class='sidebar-item' href='#'><span class='sidebar-icon'>📋</span><span class='sidebar-label'>Projects</span></a><a class='sidebar-item' href='#'><span class='sidebar-icon'>👤</span><span class='sidebar-label'>Users</span></a><a class='sidebar-item' href='#'><span class='sidebar-icon'>⚙</span><span class='sidebar-label'>Settings</span></a></div><button class='sidebar-toggle' onclick=\"document.getElementById('sidebar').classList.toggle('collapsed')\" aria-label='Toggle sidebar'>◀</button></nav>",
+      "cssExample": ".sidebar { display: flex; flex-direction: column; width: 240px; min-height: 100vh; background: var(--foreground); color: var(--background); transition: width 0.2s ease; overflow: hidden; flex-shrink: 0; } .sidebar.collapsed { width: 56px; } .sidebar-header { display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md); height: 56px; border-bottom: 1px solid rgba(255,255,255,0.1); white-space: nowrap; } .sidebar-logo { font-size: 20px; flex-shrink: 0; } .sidebar-app-name { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); overflow: hidden; opacity: 1; transition: opacity 0.15s ease; } .sidebar.collapsed .sidebar-app-name { opacity: 0; width: 0; } .sidebar-section { flex: 1; padding: var(--spacing-sm) 0; } .sidebar-section-label { padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); opacity: 0.5; white-space: nowrap; overflow: hidden; transition: opacity 0.15s ease; } .sidebar.collapsed .sidebar-section-label { opacity: 0; } .sidebar-item { display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-sm) var(--spacing-md); font-size: var(--font-size-sm); color: rgba(255,255,255,0.7); text-decoration: none; white-space: nowrap; transition: background 0.15s ease, color 0.15s ease; cursor: pointer; } .sidebar-item:hover { background: rgba(255,255,255,0.08); color: var(--background); } .sidebar-item.active { background: var(--primary); color: var(--primary-foreground); } .sidebar-icon { font-size: 16px; flex-shrink: 0; width: 24px; text-align: center; } .sidebar-label { overflow: hidden; opacity: 1; transition: opacity 0.15s ease; } .sidebar.collapsed .sidebar-label { opacity: 0; width: 0; } .sidebar-toggle { display: flex; align-items: center; justify-content: center; margin: var(--spacing-sm); padding: var(--spacing-sm); background: rgba(255,255,255,0.08); border: none; border-radius: var(--radius-md); color: rgba(255,255,255,0.6); cursor: pointer; font-size: 12px; transition: background 0.15s ease, transform 0.2s ease; } .sidebar.collapsed .sidebar-toggle { transform: rotate(180deg); } .sidebar-toggle:hover { background: rgba(255,255,255,0.15); }"
+    },
     "typography": {
       "description": "Typography scale and text styles",
       "variants": ["h1", "h2", "h3", "body", "small"],
@@ -184,6 +190,7 @@ Respond with a JSON object in this EXACT structure (no markdown fences, no pream
 3. **Provide HTML + CSS for EVERY component** — The frontend will render these directly
 4. **Use CSS custom properties** — All examples should reference tokens as var(--primary), var(--spacing-md), etc.
 5. **Stay true to the template aesthetic** — Don't completely redesign, just customize for the domain
+6. **Layout pattern must always be "Sidebar Left Collapsible"** — The sidebar expands to 240px (icon + label) and collapses to 56px (icon-only rail). Never output "Sidebar Left Fixed".
 6. **Add domain-specific tokens** — If the PRD mentions workflow states like "pending review", "approved", "denied", create color tokens for those
 7. **Explanation must be concise** — 2-4 sentences maximum
 8. **Ensure color contrast** — All color combinations must meet WCAG AA standards (4.5:1 for normal text, 3:1 for large text)
@@ -216,6 +223,8 @@ Before returning your response, verify:
 - [ ] Output is valid JSON (no syntax errors, properly escaped quotes)
 - [ ] All design token categories are present (colors, typography, spacing, borderRadius, shadows)
 - [ ] Every component has description, variants, htmlExample, and cssExample
+- [ ] Sidebar component is present with collapsible behavior (expanded + collapsed variants)
+- [ ] Layout pattern is "Sidebar Left Collapsible", not "Sidebar Left Fixed"
 - [ ] CSS examples use var(--token-name) syntax consistently
 - [ ] No ellipsis (...) in CSS — all rules are complete
 - [ ] Explanation is 2-4 sentences and mentions specific customizations
