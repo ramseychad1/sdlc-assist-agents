@@ -188,7 +188,28 @@ Respond with a JSON object in this EXACT structure (no markdown fences, no pream
 1. **Output ONLY valid JSON** — No markdown fences (no ```json), no preamble, no explanation outside the JSON structure
 2. **Include ALL token categories** — colors, typography, spacing, borderRadius, shadows
 3. **Provide HTML + CSS for EVERY component** — The frontend will render these directly
-4. **Use CSS custom properties** — All examples should reference tokens as var(--primary), var(--spacing-md), etc.
+4. **CSS custom properties MUST use kebab-case exclusively** — Never use camelCase variable names. The complete reference is:
+
+   Colors:      var(--primary)  var(--primary-foreground)  var(--secondary)  var(--secondary-foreground)
+                var(--success)  var(--success-foreground)  var(--warning)    var(--warning-foreground)
+                var(--error)    var(--error-foreground)    var(--info)       var(--info-foreground)
+                var(--background)  var(--foreground)  var(--muted)  var(--muted-foreground)
+                var(--border)  var(--card)  var(--card-foreground)
+                Domain tokens follow the same pattern: var(--pending)  var(--pending-foreground)
+
+   Typography:  var(--font-size-xs)  var(--font-size-sm)  var(--font-size-base)  var(--font-size-lg)
+                var(--font-size-xl)  var(--font-size-2xl)  var(--font-size-3xl)
+                var(--font-weight-normal)  var(--font-weight-medium)  var(--font-weight-semibold)  var(--font-weight-bold)
+                var(--line-height-tight)  var(--line-height-normal)  var(--line-height-relaxed)
+
+   Spacing:     var(--spacing-xs)  var(--spacing-sm)  var(--spacing-md)  var(--spacing-lg)  var(--spacing-xl)  var(--spacing-2xl)
+
+   Radius:      var(--radius-sm)  var(--radius-md)  var(--radius-lg)  var(--radius-xl)  var(--radius-full)
+
+   Shadows:     var(--shadow-sm)  var(--shadow-md)  var(--shadow-lg)  var(--shadow-xl)
+
+   WRONG: var(--primaryForeground)  var(--fontSize-base)  var(--fontWeight-medium)  var(--borderRadius-md)  var(--lineHeight-tight)
+   RIGHT: var(--primary-foreground) var(--font-size-base) var(--font-weight-medium) var(--radius-md)        var(--line-height-tight)
 5. **Stay true to the template aesthetic** — Don't completely redesign, just customize for the domain
 6. **Layout pattern must always be "Sidebar Left Collapsible"** — The sidebar expands to 240px (icon + label) and collapses to 56px (icon-only rail). Never output "Sidebar Left Fixed".
 6. **Add domain-specific tokens** — If the PRD mentions workflow states like "pending review", "approved", "denied", create color tokens for those
@@ -225,7 +246,7 @@ Before returning your response, verify:
 - [ ] Every component has description, variants, htmlExample, and cssExample
 - [ ] Sidebar component is present with collapsible behavior (expanded + collapsed variants)
 - [ ] Layout pattern is "Sidebar Left Collapsible", not "Sidebar Left Fixed"
-- [ ] CSS examples use var(--token-name) syntax consistently
+- [ ] All CSS custom properties use kebab-case (e.g., var(--primary-foreground), var(--font-size-base), var(--font-weight-medium), var(--radius-md), var(--shadow-sm)) — zero camelCase variable names
 - [ ] No ellipsis (...) in CSS — all rules are complete
 - [ ] Explanation is 2-4 sentences and mentions specific customizations
 - [ ] Color contrast meets WCAG AA standards (foreground on background)
