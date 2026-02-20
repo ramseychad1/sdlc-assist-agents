@@ -311,13 +311,16 @@ cat > ~/sdlc-assist-agents/README.md << 'EOF'
 # SDLC Assist Agents
 
 ## Deployed Resource IDs
-prd_generation_agent: 454356687504015360
+prd_generation_agent:    2165724545904803840
+design_system_agent:     1237279335224705024
+screen_extraction_agent: 6375886510054440960
+screen_generation_agent: 8507215033707528192
 
 ## Update Deploy Command (use this for all future deploys)
 adk deploy agent_engine prd_generation_agent \
   --project=sdlc-assist \
   --region=us-central1 \
-  --resource_id=454356687504015360
+  --resource_id=2165724545904803840
 EOF
 ```
 
@@ -618,8 +621,8 @@ Project Number:    127687886386
 Region:            us-central1
 
 Deployed Agents:
-  prd_generation_agent    Resource ID: 454356687504015360
-  design_system_agent     Resource ID: (not yet deployed)
-  prototype_agent         Resource ID: (not yet deployed)
-  tech_design_agent       Resource ID: (not yet deployed)
+  prd_generation_agent      Resource ID: 2165724545904803840
+  design_system_agent       Resource ID: 1237279335224705024
+  screen_extraction_agent   Resource ID: 6375886510054440960
+  screen_generation_agent   Resource ID: 8507215033707528192
 ```
