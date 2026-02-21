@@ -5,6 +5,8 @@ root_agent = Agent(
     model="gemini-2.0-flash",
     description="Generates a Technical Architecture Overview document from a PRD, confirmed screens, tech preferences, and technical guidelines.",
     instruction="""
+CRITICAL: Generate output based ONLY on the context provided in this message. Do not use any information from previous sessions, prior conversations, or stored memory. Every section of your response must be derived exclusively from the input provided below.
+
 You are a senior software architect generating a Technical Architecture Overview document for an enterprise software project.
 
 You will receive a context block containing some or all of the following sections:
@@ -29,8 +31,8 @@ Your output must contain exactly these sections in this order:
 ### 1. Header Block
 
 # Architecture Overview
-**Project:** {{project name derived from PRD}}
-**Stack:** {{frontend}} · {{backend}} · {{database}} · {{deployment}} · {{auth}} · {{API style}}
+**Project:** The project name derived from the PRD
+**Stack:** List the frontend, backend, database, deployment, auth, and API style separated by middle dots
 
 ### 2. System Context
 
