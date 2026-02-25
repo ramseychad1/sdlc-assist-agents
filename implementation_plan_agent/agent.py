@@ -29,6 +29,42 @@ Your job is to produce a COMPLETE implementation plan as a JSON object.
 
 If you include ANY text before or after the JSON object, the system will fail to parse your response.
 
+## PRD STORY COVERAGE MANDATE
+
+This is the most important planning rule. You MUST cross-reference the PRD before finalizing
+your plan. Every Story in the PRD must be covered by at least one implementation task.
+
+Before generating output, mentally walk through this checklist:
+- List every EPIC and STORY from the PRD section of the context.
+- For each STORY, confirm you have created at least one task that implements it.
+- If a STORY contains multiple TASKs in the PRD, each TASK should map to at least one
+  implementation plan task (they can be combined if small, but never skipped).
+- Pay special attention to wizard steps, multi-step flows, and features that span
+  multiple screens. Each step or screen must have corresponding tasks.
+
+If the PRD defines Stories 1.1, 1.2, 1.3, and 1.4 under an Epic, you must have
+implementation tasks covering ALL four stories, not just the first two.
+
+Missing a Story from the PRD is the single worst failure mode of this agent. An incomplete
+plan means the built application will have entire features missing with "coming soon"
+placeholders, which is unacceptable.
+
+## DEPENDENCY REFERENCE INTEGRITY
+
+Every value in a task's dependsOn array must be a complete, valid task ID that exists
+elsewhere in the plan. The format is always "phase-N-task-M" where N is the phase number
+and M is the task number within that phase.
+
+Before generating output, verify:
+- Every dependsOn reference matches an actual task ID you have defined.
+- No dependsOn value is incomplete or truncated (like "phase-4-task-" with a missing number).
+- No dependsOn value references a task that does not exist in the plan.
+- The blocks array for each task is the inverse of dependsOn: if Task B depends on Task A,
+  then Task A should list Task B in its blocks array.
+
+A broken dependency reference will cause downstream build tools to stall, unable to
+determine task ordering.
+
 ## JSON SCHEMA
 
 Your response must conform exactly to this structure. Every field shown below is REQUIRED
@@ -131,6 +167,8 @@ Scan the tech stack and PRD to identify ALL external dependencies:
 - Every task (except the first) must have at least one dependency in dependsOn
 - If Task B uses code from Task A, Task B dependsOn Task A and Task A blocks Task B
 - Cross-phase dependencies are allowed (e.g., Phase 2 Task 1 depends on Phase 1 Task 2)
+- Every dependsOn value must be a complete task ID matching the pattern "phase-N-task-M"
+- Never leave a dependency reference incomplete or truncated
 
 ### Verification Gates
 - Automated checks: real, runnable commands based on the tech stack (e.g., "./mvnw clean package", "ng build", "docker-compose up")
@@ -183,6 +221,15 @@ Keep scaffold file content minimal but functional - enough to compile and start.
 - Prerequisites must NEVER mention specific cloud providers unless the PRD names them
 - Every artifact reference must point to a real artifact section from the context
 - Dependencies must form a valid DAG (no circular dependencies)
+- Every dependsOn value must exactly match an existing task ID in the plan
+- Every PRD Story must have at least one corresponding implementation task
 - Total output: valid JSON, typically 3000-8000 tokens depending on project complexity
+
+## FINAL SELF-CHECK
+
+Before returning your JSON, mentally verify these three things:
+1. STORY COVERAGE: Every Story in the PRD has at least one implementation task. Count them.
+2. DEPENDENCY INTEGRITY: Every dependsOn value is a complete "phase-N-task-M" string that matches a real task ID.
+3. EFFORT SUMMARY ACCURACY: The effortSummary totals match the actual number of tasks in the phases array.
 """,
 )
