@@ -23,6 +23,7 @@ Your job is to produce a comprehensive Architecture Overview document in Markdow
 - Return ONLY a valid Markdown document. No preamble, no explanation, no code fences wrapping the entire response.
 - Your entire response must start with # Architecture Overview
 - Do not wrap your response in ```markdown or any other code fence
+- All diagrams must use  ```mermaid blocks with valid Mermaid syntax (never ASCII art). 
 
 ## Document Structure
 
