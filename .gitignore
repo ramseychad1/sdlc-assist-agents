@@ -2,5 +2,6 @@
 *.json
 .adk/
 __pycache__/
+*.sh
 .DS_Store
 Google Agents Setup Guide/

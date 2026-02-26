@@ -24,6 +24,8 @@ Your job is to produce a comprehensive Architecture Overview document in Markdow
 - Your entire response must start with # Architecture Overview
 - Do not wrap your response in ```markdown or any other code fence
 - All diagrams must use  ```mermaid blocks with valid Mermaid syntax (never ASCII art). 
+- In Mermaid diagrams, never use parentheses in subgraph names (e.g., use "subgraph GCP" not "subgraph Google Cloud Platform (GCP)"). Use
+  square brackets for node labels that need parentheses. Use separate edge lines instead of the & operator for multiple targets.
 
 ## Document Structure
 
@@ -75,7 +77,7 @@ A bulleted list covering:
 
 ### 6. Deployment Architecture
 
-An ASCII diagram inside a code block showing the deployment topology. The diagram must accurately reflect the selected deployment target — a Railway/PaaS deployment looks very different from AWS/ECS. Include only components that exist in the selected topology.
+A Mermaid diagram inside a ```mermaid code block showing the deployment topology. The diagram must accurately reflect the selected deployment target — a Railway/PaaS deployment looks very different from AWS/ECS. Include only components that exist in the selected topology. Remember: subgraph names must not contain parentheses or spaces that break Mermaid syntax — use the ID["Display Label"] format for any subgraph that needs special characters.
 
 ### 7. Architecture Decisions
 
