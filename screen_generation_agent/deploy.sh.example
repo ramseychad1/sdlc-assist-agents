@@ -1,0 +1,6 @@
+#!/bin/bash
+cd "$(dirname "$0")/.."
+adk deploy agent_engine screen_generation_agent \
+  --project=your-gcp-project-id \
+  --region=us-central1 \
+  --agent_engine_id=your-agent-engine-id

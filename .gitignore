@@ -1,7 +1,9 @@
 .env
+!.env.example
 *.json
 .adk/
 __pycache__/
 *.sh
+!*.sh.example
 .DS_Store
 Google Agents Setup Guide/
