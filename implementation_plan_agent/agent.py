@@ -171,9 +171,34 @@ Scan the tech stack and PRD to identify ALL external dependencies:
 - Never leave a dependency reference incomplete or truncated
 
 ### Verification Gates
-- Automated checks: real, runnable commands based on the tech stack (e.g., "./mvnw clean package", "ng build", "docker-compose up")
+- Automated checks: real, runnable commands based on the tech stack (e.g., "./mvnw clean package", "docker-compose up")
 - Manual checks: specific, observable actions (e.g., "Navigate to http://localhost:4200, see login form, enter admin/admin, see dashboard")
 - The "whatYouShouldSee" field is a plain-English summary for non-technical stakeholders
+
+### Frontend Build Command Rules (CRITICAL — derive from TECHNOLOGY STACK, not memory)
+The frontend build command must match the selected frontend framework exactly.
+Never use a command from a different framework. Derive this from the TECHNOLOGY STACK
+section of the project context — not from prior sessions or examples.
+
+React projects (react-scripts / Create React App / Vite):
+  Correct build command: npm run build
+  Correct dev command: npm start
+  NEVER use ng build, ng serve, or any Angular CLI command for React projects
+
+Angular projects:
+  Correct build command: ng build
+  Correct dev command: ng serve
+  NEVER use npm run build (as the build command) or react-scripts for Angular projects
+
+Vue projects:
+  Correct build command: npm run build
+  Correct dev command: npm run dev
+
+Apply the same framework-awareness to:
+- filesToCreate arrays (React uses App.jsx/App.tsx, Angular uses app.component.ts)
+- File path conventions (React uses src/components/, Angular uses src/app/features/)
+- package.json scripts section in scaffold files
+- All acceptance criteria commands in every task and verification gate
 
 ### File Paths
 - Use realistic file paths based on the tech stack conventions
@@ -224,8 +249,27 @@ Required sections in this order:
    how to activate them (e.g. --spring.profiles.active=dev). If no mocks configured,
    omit this section entirely.
 
-7. Environment Variables — list every env var the app needs with a brief description.
+7. Environment Variables — list every env var the app needs, grouped by category.
    Group them: Database, Authentication, Third-party APIs, App Config.
+
+   IMPORTANT: All environment variables must be listed regardless of mock configuration.
+   The app code must reference them even in dev mode — mocks bypass the real services
+   but the variables must still be declared so the app compiles and deploys cleanly.
+
+   When mockAuth is true in MOCK CONFIGURATION, annotate the auth vars like this:
+     - OKTA_CLIENT_ID: Okta application client ID
+       (Not required locally — dev profile bypasses auth. Required for production.)
+     - OKTA_CLIENT_SECRET: Okta application client secret
+       (Not required locally — dev profile bypasses auth. Required for production.)
+     - OKTA_ISSUER_URI: Okta issuer URI
+       (Not required locally — dev profile bypasses auth. Required for production.)
+
+   When mockThirdPartyApis is true in MOCK CONFIGURATION, annotate the API key vars:
+     - OPTUMRX_API_KEY: OptumRx PBM API key
+       (Not required locally — dev profile uses WireMock stubs. Required for production.)
+
+   Apply the same annotation pattern to any other mocked third-party API vars.
+   The annotation clarifies intent without removing the var from the list.
 
 8. Artifacts Reference — one line pointing to IMPLEMENTATION_PLAN.md and artifacts/.
 
@@ -239,25 +283,39 @@ starting point — if they are incomplete or wrong, CCC will spend multiple turn
 them instead of building features. Get them right the first time.
 
 #### backend/pom.xml (Spring Boot projects)
-MUST include ALL of the following — a pom.xml without these will not compile:
-- The Spring Boot parent BOM with explicit version 3.4.x:
-    <parent>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-parent</artifactId>
-      <version>3.4.3</version>
-    </parent>
-- Java version property: <java.version>21</java.version>
-- spring-boot-starter-web
-- spring-boot-starter-data-jpa
-- spring-boot-starter-security
-- spring-boot-starter-validation
-- postgresql driver (runtime scope)
-- flyway-core (for database migrations)
-- spring-boot-starter-data-redis (only if architecture requires caching)
-- lombok (provided scope)
-- spring-boot-starter-test (test scope)
-- The spring-boot-maven-plugin in <build><plugins>
-Do NOT omit the parent BOM. Without it, no dependency version resolves and Maven fails.
+You MUST output the pom.xml with EXACTLY this structure. Copy this XML and substitute
+PROJECTNAME and ARTIFACTNAME from the project context. Do not summarize, do not omit
+any dependency, do not replace the XML with bullet points or comments. The complete
+XML below is the required content for the scaffold pom.xml file.
+
+Required pom.xml structure (substitute PROJECTNAME = Java package name lowercase no spaces,
+ARTIFACTNAME = artifact id lowercase with hyphens):
+
+modelVersion 4.0.0
+parent: groupId org.springframework.boot, artifactId spring-boot-starter-parent, version 3.4.3, relativePath empty
+groupId: com.PROJECTNAME
+artifactId: ARTIFACTNAME
+version: 0.0.1-SNAPSHOT
+packaging: jar
+properties: java.version = 21
+
+dependencies (ALL of these are required, do not omit any):
+  1. spring-boot-starter-web (org.springframework.boot)
+  2. spring-boot-starter-data-jpa (org.springframework.boot)
+  3. spring-boot-starter-security (org.springframework.boot)
+  4. spring-boot-starter-validation (org.springframework.boot)
+  5. postgresql (org.postgresql) - scope: runtime
+  6. flyway-core (org.flywaydb)
+  7. lombok (org.projectlombok) - scope: provided
+  8. spring-boot-starter-test (org.springframework.boot) - scope: test
+  9. okta-spring-boot-starter version 3.0.6 (com.okta.spring) - ONLY if Okta auth in tech stack
+  10. spring-boot-starter-data-redis (org.springframework.boot) - ONLY if Redis in architecture
+
+build/plugins: spring-boot-maven-plugin (org.springframework.boot) with lombok excluded from repackage
+
+Every dependency listed above (items 1-8) is unconditionally required. Items 9-10 are
+conditional on the tech stack. Outputting fewer than 8 dependencies means the project
+will not compile. Do not remove any. Do not add comments in place of dependencies.
 
 #### backend/src/main/resources/application.yml
 MUST include:
@@ -272,9 +330,49 @@ MUST include:
 - Any auth configuration required by the stack (Okta, JWT, etc.) reading from env vars
 - Logging level: INFO for the app package
 
+#### backend/src/main/resources/application.yml — env var defaults for mocked services
+When mockAuth is true, add safe fallback defaults to the auth config in application.yml
+so the app starts without real credentials. Use clearly fake placeholder values:
+- For Okta: client-id uses placeholder "mock", client-secret uses "mock",
+  issuer-uri uses "http://localhost" as the default value in the substitution syntax.
+  Example: client-id: use the dollar-sign curly-brace syntax with OKTA_CLIENT_ID
+  and a default of "mock" so it reads the env var if present but does not fail if absent.
+- For any other mocked third-party API keys, apply the same pattern:
+  use the substitution syntax with a default of "mock" or an empty string.
+- These defaults are intentionally non-functional — the dev profile disables the real
+  service before these values are ever used.
+
 #### backend/src/main/resources/application-dev.yml (if mocks enabled)
 Only generate this file if mockExternalDependencies is true in MOCK CONFIGURATION.
-Include the dev-profile overrides for auth bypass and/or H2 database as applicable.
+This file is activated by --spring.profiles.active=dev and must do three things:
+
+1. Disable Spring Security auto-configuration for OAuth2/SSO so the app does not
+   attempt to contact the Okta issuer URI on startup. Set:
+   spring.autoconfigure.exclude to include the relevant OAuth2 auto-config classes.
+
+2. If mockDatabase is true, override the datasource with H2 in-memory settings:
+   url: jdbc:h2:mem:testdb, driver: org.h2.Driver, dialect: H2Dialect.
+   Also enable the H2 console at /h2-console.
+
+3. Add a comment block at the top of the file explaining:
+   - This profile is for local development only
+   - Auth is bypassed via DevSecurityConfig.java
+   - Which env vars are intentionally not needed in this profile
+   - Which env vars ARE still needed (e.g. DATABASE_URL if not using H2)
+   - How to switch to production mode (remove the dev profile, set real env vars)
+
+#### backend/src/main/java/[package]/config/DevSecurityConfig.java (if mockAuth enabled)
+When generating this file, include a comment block at the top that lists:
+- Every auth-related env var that is bypassed in dev mode
+  (OKTA_CLIENT_ID, OKTA_CLIENT_SECRET, OKTA_ISSUER_URI or equivalent)
+- A note that these vars must be set in production (non-dev profile)
+- The exact env var names so a developer can copy them into their production config
+  without reading any other file
+Example comment:
+  Dev profile auth bypass — the following env vars are NOT required locally:
+    OKTA_CLIENT_ID, OKTA_CLIENT_SECRET, OKTA_ISSUER_URI
+  Set these in your production environment to enable real Okta authentication.
+  Remove the dev Spring profile to activate production auth.
 
 #### docker-compose.yml
 MUST include:
@@ -293,6 +391,9 @@ MUST include:
 - axios for HTTP calls (unless the architecture specifies fetch)
 - react-scripts at 5.0.1
 - Standard scripts: start, build, test
+- "proxy": "http://localhost:8080" — REQUIRED for React dev server to forward
+  API calls to the Spring Boot backend. Without this, all /api/v1/ calls will
+  404 in the browser during local development. This is not optional.
 - Do NOT include testing libraries beyond what react-scripts provides by default
 
 #### frontend/package.json (Angular projects)
@@ -309,6 +410,21 @@ Generate an initial Flyway migration that creates the first 2-3 core tables from
 Data Model. Use the exact column names, types, and constraints from DATA_MODEL.md.
 Include: CREATE EXTENSION IF NOT EXISTS "pgcrypto"; for UUID generation.
 This file proves to CCC that Flyway is wired correctly from the start.
+
+#### scaffold/backend/src/main/resources/db/migration/V002__seed_dev_data.sql (always include when mockDatabase is true OR when dev profile is active)
+Generate a seed data migration with 3-5 realistic sample records per core entity.
+This file is critical for local development — without it, every list view is empty
+and verification gates that say "you should see data" cannot be confirmed.
+Rules:
+- Use hardcoded UUIDs in the format xxxxxxxx-0001-0001-0001-xxxxxxxxxxxx so records
+  are predictable and referenceable in tests and manual QA
+- Include records in foreign key order (parent tables before child tables)
+- Use realistic domain-specific values (not "test1", "foo", "bar")
+- Include at least one record in each status/state variant (e.g. active, inactive,
+  terminated) so edge cases are testable from day one
+- Name the file V002__seed_dev_data.sql — never V001 (that is always schema-only)
+- CLAUDE.md Development Commands should reference this file:
+  "Seed data is pre-loaded via V002__seed_dev_data.sql on startup"
 
 ### Configuration-Aware Generation
 - If targetConsumer is "ai_tool": optimize tasks for autonomous execution, include very specific file paths, acceptance criteria as runnable commands
@@ -330,11 +446,35 @@ This file proves to CCC that Flyway is wired correctly from the start.
 - Every PRD Story must have at least one corresponding implementation task
 - Total output: valid JSON, typically 3000-8000 tokens depending on project complexity
 
+### Navigation Completeness Rule (CRITICAL)
+Every screen that contains a list of items with clickable rows MUST have a
+corresponding detail screen task. If the plan includes a search results screen
+where rows are clickable, there must be a separate task for a detail screen at
+the route /entity/:id. Do not assume CCC will invent the detail screen — if it
+is not in the plan as an explicit task with a route, filesToCreate, and
+acceptance criteria, it will not be built or will be built incorrectly.
+
+Before finalizing the plan, scan every task that creates a list/table/results
+screen. For each one, ask: what happens when the user clicks a row? If the
+answer is navigation to a detail view, that detail view must have its own task.
+
+Apply the same rule to dashboard cards that link to detail pages, notification
+items that open detail views, and any search result that navigates on click.
+
 ## FINAL SELF-CHECK
 
-Before returning your JSON, mentally verify these three things:
+Before returning your JSON, mentally verify these four things:
 1. STORY COVERAGE: Every Story in the PRD has at least one implementation task. Count them.
 2. DEPENDENCY INTEGRITY: Every dependsOn value is a complete "phase-N-task-M" string that matches a real task ID.
 3. EFFORT SUMMARY ACCURACY: The effortSummary totals match the actual number of tasks in the phases array.
+4. FRAMEWORK CONSISTENCY: Read the TECHNOLOGY STACK section. Confirm that every build command,
+   dev command, file path, and file extension in the entire plan matches that framework.
+   If the stack says React, there must be zero instances of ng build, angular.json, or
+   app.component.ts anywhere in the output. If the stack says Angular, there must be zero
+   instances of react-scripts, App.jsx, or react-router-dom anywhere in the output.
+5. NAVIGATION COMPLETENESS: For every task that creates a list, table, or search results
+   screen with clickable rows, confirm there is a corresponding detail screen task in the
+   plan. If a list links somewhere, that destination must be a planned task with a route,
+   filesToCreate, and acceptance criteria.
 """,
 )

@@ -5,5 +5,7 @@
 __pycache__/
 *.sh
 !*.sh.example
+archive/
+*_tmp*/
 .DS_Store
 Google Agents Setup Guide/
