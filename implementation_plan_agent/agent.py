@@ -76,6 +76,7 @@ Top-level fields:
 - targetConsumer: string (from CONFIGURATION section)
 - deliveryStrategy: string (from CONFIGURATION section)
 - includeScaffold: boolean (from CONFIGURATION section)
+- buildScope: string (from CONFIGURATION section — either "core_mvp" or "full_build")
 - generatedAt: string (current ISO-8601 datetime)
 - effortSummary: object (see below)
 - claudeMdContent: string (the full CLAUDE.md file as a single string with backslash-n for newlines)
@@ -432,6 +433,24 @@ Rules:
 - If targetConsumer is "both": include both styles (specific paths AND human context)
 - If deliveryStrategy is "phased": group tasks into phases with verification gates (this is the default and recommended approach)
 - If deliveryStrategy is "single": create a single phase with all tasks (still include a final verification gate)
+
+### Build Scope Rules (CRITICAL)
+
+If buildScope is "core_mvp":
+  Include ONLY screens that are on the critical path of the primary user workflow.
+  The primary workflow is the sequence of screens a user must navigate to accomplish
+  the core purpose of the application (e.g. search, verify, act on result).
+  Exclude: reporting screens, admin screens, dashboards with no primary action,
+  secondary detail screens that are not required for the core flow.
+  For each excluded screen, add a note to the final phase gate:
+  "Phase 2 (future): [Screen Name] — not included in Core MVP build."
+  This tells CCC what was intentionally left out so it does not try to wire routes
+  or navigation to screens that do not exist.
+
+If buildScope is "full_build":
+  Every screen listed in the CONFIRMED UI SCREENS section must have at least one
+  corresponding implementation task. No screen may be omitted. Apply the Navigation
+  Completeness Rule to all screens including reporting, admin, and secondary screens.
 
 ## QUALITY STANDARDS
 
