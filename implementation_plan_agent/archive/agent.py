@@ -183,132 +183,27 @@ Scan the tech stack and PRD to identify ALL external dependencies:
 - Use the project name (lowercase, no spaces) in package paths
 
 ### CLAUDE.md Content
-Generate a comprehensive CLAUDE.md that gives an AI coding tool everything it needs to
-build this project without asking questions. This is the most important file CCC reads.
-
-Required sections in this order:
-
-1. Project Overview — 2-3 sentences describing what the system does and who uses it.
-   Be specific to the domain, not generic.
-
-2. Tech Stack — bulleted list including EXACT versions:
-   - Backend: e.g. "Java 21 / Spring Boot 3.4.x"
-   - Frontend: e.g. "React 18 / React Router v6"
-   - Database: e.g. "PostgreSQL 15"
-   - Migration tool: e.g. "Flyway" (always specify this — never leave it ambiguous)
-   - Authentication: e.g. "OAuth 2.0 via Okta (Spring Security 6)"
-   - Cache: include only if the architecture requires it
-   - Deployment: e.g. "Google Cloud Run"
-
-3. Project Structure — full directory tree showing package layout. For Spring Boot,
-   show the full Java package path using the actual project name (lowercase, no spaces).
-   For React, show the src/app/ feature folder breakdown.
-
-4. Development Commands — copy from context, but also include:
-   - How to run with the dev profile if mocks are enabled
-   - The exact command to run CCC autonomously:
-     claude --dangerously-skip-permissions
-
-5. Key Coding Conventions — derive these from the architecture and data model. Include:
-   - REST API versioning pattern (e.g. /api/v1/)
-   - Error response shape (derive from API Contract)
-   - Entity conventions (UUID PKs, audit timestamps, soft deletes if present)
-   - Controller/Service/Repository separation rule
-   - Injection style (constructor injection via Lombok RequiredArgsConstructor)
-   - Migration file naming (e.g. V001__description.sql for Flyway)
-   - Test framework: JUnit 5 + Mockito (or equivalent for the stack)
-   - ddl-auto must always be "validate" — never "update" or "create"
-
-6. Mock Configuration — ONLY include this section if mockExternalDependencies is true
-   in the MOCK CONFIGURATION section of the context. List which mocks are active and
-   how to activate them (e.g. --spring.profiles.active=dev). If no mocks configured,
-   omit this section entirely.
-
-7. Environment Variables — list every env var the app needs with a brief description.
-   Group them: Database, Authentication, Third-party APIs, App Config.
-
-8. Artifacts Reference — one line pointing to IMPLEMENTATION_PLAN.md and artifacts/.
-
-Target length: 150-300 lines. Longer is better than shorter here — this file is read
-once by CCC and then referenced throughout the build. Gaps in CLAUDE.md become
-improvised decisions by CCC that may conflict with the actual design.
+Generate a concise CLAUDE.md (under 200 lines when rendered). Include:
+- Project overview (1 paragraph)
+- Tech stack (bulleted list)
+- Project directory structure
+- Development commands (backend, frontend, database, docker)
+- Key coding conventions (derived from the architecture and guidelines)
+- Reference to IMPLEMENTATION_PLAN.md and artifacts directory
+- Prerequisites reference pointing to Phase 0 in the plan
+- Environment variables list
 
 ### Scaffold Files (when includeScaffold is true)
-Generate production-ready starter files. These files are used directly by CCC as the
-starting point — if they are incomplete or wrong, CCC will spend multiple turns fixing
-them instead of building features. Get them right the first time.
+Generate starter files for:
+- Backend build config (pom.xml or build.gradle depending on stack)
+- Backend application config (application.yml)
+- Backend main class
+- Frontend package.json
+- Frontend angular.json (or equivalent)
+- docker-compose.yml with database service
+- .gitignore
 
-#### backend/pom.xml (Spring Boot projects)
-MUST include ALL of the following — a pom.xml without these will not compile:
-- The Spring Boot parent BOM with explicit version 3.4.x:
-    <parent>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-parent</artifactId>
-      <version>3.4.3</version>
-    </parent>
-- Java version property: <java.version>21</java.version>
-- spring-boot-starter-web
-- spring-boot-starter-data-jpa
-- spring-boot-starter-security
-- spring-boot-starter-validation
-- postgresql driver (runtime scope)
-- flyway-core (for database migrations)
-- spring-boot-starter-data-redis (only if architecture requires caching)
-- lombok (provided scope)
-- spring-boot-starter-test (test scope)
-- The spring-boot-maven-plugin in <build><plugins>
-Do NOT omit the parent BOM. Without it, no dependency version resolves and Maven fails.
-
-#### backend/src/main/resources/application.yml
-MUST include:
-- server.port: 8080
-- spring.application.name (use the project name)
-- spring.datasource.url reading from DATABASE_URL env var with a localhost default
-- spring.datasource.username and password from env vars
-- spring.jpa.hibernate.ddl-auto: validate  (NEVER "update" or "create")
-- spring.jpa.show-sql: false
-- spring.flyway.enabled: true
-- spring.flyway.locations: classpath:db/migration
-- Any auth configuration required by the stack (Okta, JWT, etc.) reading from env vars
-- Logging level: INFO for the app package
-
-#### backend/src/main/resources/application-dev.yml (if mocks enabled)
-Only generate this file if mockExternalDependencies is true in MOCK CONFIGURATION.
-Include the dev-profile overrides for auth bypass and/or H2 database as applicable.
-
-#### docker-compose.yml
-MUST include:
-- postgres service (image: postgres:15) with POSTGRES_USER, POSTGRES_PASSWORD,
-  POSTGRES_DB reading from environment or hardcoded dev values
-- volumes for data persistence
-- redis service (image: redis:7-alpine) ONLY if the architecture requires caching
-- All ports mapped to localhost
-- A named network connecting all services
-Do NOT hardcode production credentials. Use dev-safe placeholder values.
-
-#### frontend/package.json (React projects)
-MUST include:
-- react and react-dom at ^18.2.0
-- react-router-dom at ^6.x for routing
-- axios for HTTP calls (unless the architecture specifies fetch)
-- react-scripts at 5.0.1
-- Standard scripts: start, build, test
-- Do NOT include testing libraries beyond what react-scripts provides by default
-
-#### frontend/package.json (Angular projects)
-Use the actual Angular version from the tech stack context. Include:
-- @angular/core and all @angular/xxx packages at the correct version
-- @angular/material if the design system uses Material
-- rxjs at compatible version
-
-#### .gitignore
-Include: node_modules/, .env, /target, *.class, .DS_Store, dist/, .idea/, *.iml
-
-#### scaffold/backend/src/main/resources/db/migration/V001__init.sql (always include)
-Generate an initial Flyway migration that creates the first 2-3 core tables from the
-Data Model. Use the exact column names, types, and constraints from DATA_MODEL.md.
-Include: CREATE EXTENSION IF NOT EXISTS "pgcrypto"; for UUID generation.
-This file proves to CCC that Flyway is wired correctly from the start.
+Keep scaffold file content minimal but functional - enough to compile and start.
 
 ### Configuration-Aware Generation
 - If targetConsumer is "ai_tool": optimize tasks for autonomous execution, include very specific file paths, acceptance criteria as runnable commands
