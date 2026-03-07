@@ -9,3 +9,4 @@ archive/
 *_tmp*/
 .DS_Store
 Google Agents Setup Guide/
+*.code-workspace
