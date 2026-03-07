@@ -2,7 +2,7 @@ from google.adk.agents import Agent
 
 root_agent = Agent(
     name="implementation_plan_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-pro",
     description="Generates a structured JSON implementation plan with phased tasks, prerequisites, verification gates, CLAUDE.md, and optional scaffold files from all upstream SDLC artifacts.",
     instruction="""
 CRITICAL: Return ONLY a valid JSON object. No preamble, no explanation, no Markdown, no code fences.
@@ -77,6 +77,8 @@ Top-level fields:
 - deliveryStrategy: string (from CONFIGURATION section)
 - includeScaffold: boolean (from CONFIGURATION section)
 - buildScope: string (from CONFIGURATION section — either "core_mvp" or "full_build")
+  This field MUST be echoed back in the output so the package header shows which scope
+  was used. It appears in the Project Summary section of the rendered plan.
 - generatedAt: string (current ISO-8601 datetime)
 - effortSummary: object (see below)
 - claudeMdContent: string (the full CLAUDE.md file as a single string with backslash-n for newlines)
@@ -412,10 +414,10 @@ Data Model. Use the exact column names, types, and constraints from DATA_MODEL.m
 Include: CREATE EXTENSION IF NOT EXISTS "pgcrypto"; for UUID generation.
 This file proves to CCC that Flyway is wired correctly from the start.
 
-#### scaffold/backend/src/main/resources/db/migration/V002__seed_dev_data.sql (always include when mockDatabase is true OR when dev profile is active)
-Generate a seed data migration with 3-5 realistic sample records per core entity.
-This file is critical for local development — without it, every list view is empty
-and verification gates that say "you should see data" cannot be confirmed.
+#### scaffold/backend/src/main/resources/db/migration/V002__seed_dev_data.sql (ALWAYS INCLUDE — no exceptions)
+This file is REQUIRED in every package regardless of mock configuration. Without it,
+every list view is empty and verification gates cannot be confirmed.
+Generate 3-5 realistic sample records per core entity.
 Rules:
 - Use hardcoded UUIDs in the format xxxxxxxx-0001-0001-0001-xxxxxxxxxxxx so records
   are predictable and referenceable in tests and manual QA
@@ -424,8 +426,9 @@ Rules:
 - Include at least one record in each status/state variant (e.g. active, inactive,
   terminated) so edge cases are testable from day one
 - Name the file V002__seed_dev_data.sql — never V001 (that is always schema-only)
-- CLAUDE.md Development Commands should reference this file:
-  "Seed data is pre-loaded via V002__seed_dev_data.sql on startup"
+- CLAUDE.md Development Commands must include:
+  "Seed data is pre-loaded via V002__seed_dev_data.sql on first startup"
+- This file must appear in the scaffoldFiles array in the JSON output
 
 ### Configuration-Aware Generation
 - If targetConsumer is "ai_tool": optimize tasks for autonomous execution, include very specific file paths, acceptance criteria as runnable commands
@@ -436,21 +439,34 @@ Rules:
 
 ### Build Scope Rules (CRITICAL)
 
-If buildScope is "core_mvp":
-  Include ONLY screens that are on the critical path of the primary user workflow.
-  The primary workflow is the sequence of screens a user must navigate to accomplish
-  the core purpose of the application (e.g. search, verify, act on result).
-  Exclude: reporting screens, admin screens, dashboards with no primary action,
-  secondary detail screens that are not required for the core flow.
-  For each excluded screen, add a note to the final phase gate:
-  "Phase 2 (future): [Screen Name] — not included in Core MVP build."
-  This tells CCC what was intentionally left out so it does not try to wire routes
-  or navigation to screens that do not exist.
+These two modes are mutually exclusive. Apply exactly one based on the buildScope value.
+Never mix Core MVP exclusion logic into a Full Build plan or vice versa.
 
-If buildScope is "full_build":
-  Every screen listed in the CONFIRMED UI SCREENS section must have at least one
-  corresponding implementation task. No screen may be omitted. Apply the Navigation
-  Completeness Rule to all screens including reporting, admin, and secondary screens.
+--- IF buildScope is "core_mvp" ---
+
+Include ONLY screens on the critical path of the primary user workflow. The primary
+workflow is the sequence a user must navigate to accomplish the core purpose of the app.
+Exclude: all reporting screens, admin screens, and secondary screens not required for
+the core flow.
+
+For EVERY excluded screen, add one line to the final phase gate manualChecks:
+  "Not built (Full Build only): [exact screen name from CONFIRMED UI SCREENS]"
+This is the ONLY place Core MVP exclusion language belongs. Do not put it anywhere else.
+
+--- IF buildScope is "full_build" ---
+
+The MANDATORY SCREENS CHECKLIST section of the context (injected by the Java backend
+immediately after CONFIRMED UI SCREENS) lists every screen that MUST have a task.
+Treat this checklist as a hard requirement — every item must map to at least one task.
+
+Rules:
+- Every screen needs a dedicated frontend component task. An API task alone does not
+  count as coverage for a screen.
+- The screen name must appear in the task title or description — not just implied.
+- You may combine at most 2 closely related screens into one task (e.g. two report
+  screens of the same type). Never combine screens from different functional areas.
+- After building the full task list, re-read the MANDATORY SCREENS CHECKLIST line by
+  line and confirm each item has a task before outputting JSON.
 
 ## QUALITY STANDARDS
 
@@ -495,5 +511,10 @@ Before returning your JSON, mentally verify these four things:
    screen with clickable rows, confirm there is a corresponding detail screen task in the
    plan. If a list links somewhere, that destination must be a planned task with a route,
    filesToCreate, and acceptance criteria.
+6. SCREEN NAME COVERAGE (full_build only): If buildScope is full_build, read the
+   MANDATORY SCREENS CHECKLIST section in the context. Go through it line by line.
+   For each screen, confirm it has a dedicated frontend component task in the plan.
+   If any screen is missing a task, add one now before returning JSON. An API-only
+   task does not satisfy this check — the screen needs a frontend component task.
 """,
 )
