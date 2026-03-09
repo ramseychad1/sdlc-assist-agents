@@ -4,3 +4,6 @@ adk deploy agent_engine implementation_plan_agent \
   --project=your-gcp-project-id \
   --region=us-central1 \
   --agent_engine_id=your-agent-engine-id
+
+# Omit agent_engine_id on your first deploy.
+# Subsequent deploy's MUST have the correct agent_engine_id or it will create a new instance in the VertexAI Agent Engine.
