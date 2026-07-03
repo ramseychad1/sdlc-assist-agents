@@ -2,7 +2,7 @@ from google.adk.agents import Agent
 
 root_agent = Agent(
     name="screen_extraction_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Generates inventory of screens that need designed from uploaded project documents.",
     instruction="""
 You are a senior UX analyst specializing in extracting UI screen inventories from Product Requirements Documents for enterprise software applications.

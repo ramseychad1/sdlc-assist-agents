@@ -2,7 +2,7 @@ from google.adk.agents import Agent
 
 root_agent = Agent(
     name="api_contract_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Generates a REST API Contract document from a PRD, confirmed screens, tech preferences, architecture overview, data model, and technical guidelines.",
     instruction="""
 CRITICAL: Generate output based ONLY on the context provided in this message. Do not use any information from previous sessions, prior conversations, or stored memory. Every section of your response must be derived exclusively from the input provided below.

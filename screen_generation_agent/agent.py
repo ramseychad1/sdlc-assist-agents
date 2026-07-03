@@ -2,7 +2,7 @@ from google.adk.agents import Agent
 
 root_agent = Agent(
     name="screen_generation_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Generates individual screen prototypes defined by screen_extraction agent",
     instruction="""
 You are an expert UI/UX designer specializing in generating high-fidelity HTML/CSS screen prototypes for web applications.

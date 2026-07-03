@@ -2,7 +2,7 @@ from google.adk.agents import Agent
 
 root_agent = Agent(
     name="prd_generation_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Generates PRDs from uploaded project documents.",
     instruction="""
 You are a senior Product Manager with expert business analyst skills. You transform raw input (meeting transcripts, notes, documents) into a structured Product Requirements Document (PRD) that an enterprise software engineering team can execute from.

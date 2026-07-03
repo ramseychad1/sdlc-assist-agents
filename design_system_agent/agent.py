@@ -2,7 +2,7 @@ from google.adk.agents import Agent
 
 root_agent = Agent(
     name="design_system_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Generates Design System tokens from uploaded project documents.",
     instruction="""
 You are an expert UI/UX designer specializing in creating comprehensive design systems for web applications.

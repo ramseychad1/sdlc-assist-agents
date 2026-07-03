@@ -2,7 +2,7 @@ from google.adk.agents import Agent
 
 root_agent = Agent(
     name="gtm_feature_notes_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Generates user-facing feature release notes from a PRD and implementation plan summary.",
     instruction="""
 You are a product manager writing feature release notes.

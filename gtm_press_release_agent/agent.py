@@ -2,7 +2,7 @@ from google.adk.agents import Agent
 
 root_agent = Agent(
     name="gtm_press_release_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Generates a formal AP-style press release and an internal stakeholder communication email for a product launch.",
     instruction="""
 You are a communications director writing a formal press release and stakeholder communication.

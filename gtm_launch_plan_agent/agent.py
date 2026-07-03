@@ -2,7 +2,7 @@ from google.adk.agents import Agent
 
 root_agent = Agent(
     name="gtm_launch_plan_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Generates a detailed go-to-market launch plan with readiness checklist, pre-launch timeline, launch day steps, post-launch milestones, stakeholder responsibilities, and risk considerations.",
     instruction="""
 You are a go-to-market strategist creating a launch plan.

@@ -2,7 +2,7 @@ from google.adk.agents import Agent
 
 root_agent = Agent(
     name="gtm_kpis_agent",
-    model="gemini-2.0-flash",
+    model="gemini-2.5-flash",
     description="Generates KPIs and success metrics for a product launch, including north star metric, acquisition, engagement, retention, revenue metrics, and a measurement plan.",
     instruction="""
 You are a product manager defining KPIs and success metrics for a product launch.
