@@ -45,6 +45,8 @@ When a COMPONENT STYLESHEET section appears in your input context listing availa
 
 5. **You MAY include a small style tag** for page-specific layout rules only. This means grid arrangements unique to this screen, section spacing, or positioning for page-specific elements. Keep this minimal — typically under 30 lines of CSS.
 
+   **EXCEPTION — coverage gaps:** If this screen needs an element the stylesheet reference does NOT cover (for example the reference lists no table, select, dropdown, or input classes), you MUST fully style those elements yourself in the page-specific style tag, using the design tokens. Completeness beats brevity: a raw browser-default control is never acceptable, even if it makes your CSS longer than 30 lines. The 30-line guideline applies only when the stylesheet already covers everything on the screen.
+
 6. **You MAY reference CSS custom property tokens** in your page-specific CSS. For example, you can use var(--spacing-lg) or var(--primary) in your page-specific rules because the tokens will be available from the injected stylesheet.
 
 When NO component stylesheet reference appears in your input, fall back to the original behavior: define all design tokens as CSS custom properties at the :root level and generate all component CSS from scratch based on the design system JSON and template aesthetic.
@@ -135,6 +137,20 @@ When NO stylesheet is available (generate all CSS), your HTML includes everythin
 3. Use component styles from the design system JSON
 4. Include responsive layout using flexbox and grid
 5. Add hover and focus states for interactive elements
+
+## FORM CONTROLS AND TABLES — MANDATORY STYLING
+
+These rules apply ALWAYS, with or without a component stylesheet:
+
+1. **NEVER use a raw `<select multiple>` element.** For multi-choice filters, render a styled alternative instead: a group of checkbox chips, a bordered panel of labeled checkboxes, or a dropdown-styled list. Native multi-select boxes look broken in every browser.
+
+2. **Never leave any form control with browser-default styling.** Every input, select, textarea, checkbox, and button must have explicit styling (border, border-radius, padding, background, focus state) from the stylesheet classes or your page CSS.
+
+3. **Every data table must be fully styled**: header row with a distinct background and font-weight, cell padding (at least 10px 12px), row separators (bottom border), a subtle row hover state, and status values rendered as colored badge pills — never as plain text.
+
+4. **Never use emoji or decorative unicode glyphs as icons** (no 🏠 📊 ◀ ▶ ★ anywhere — navigation, buttons, headings, or links). Use text labels, CSS shapes, or simple inline SVG instead.
+
+5. **Filter/search toolbars** must be laid out as a single aligned row (flexbox, consistent heights, labels above or inside controls) — not a loose scatter of controls.
 
 ## SCREEN TYPE GUIDELINES
 
@@ -252,6 +268,7 @@ Before returning your response, verify:
 - Screen type matches the layout
 - HTML uses the correct class names from the stylesheet reference
 - Interactive elements have appropriate semantic markup
+- No raw `<select multiple>` anywhere; no browser-default-styled controls; every table has header/padding/row-border/hover styling; no emoji or decorative unicode glyphs used as icons
 - designNotes are 2-3 sentences explaining key decisions
 
 ## CRITICAL NOTES
